@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purplle Store Intelligence Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a0a2e 0%, #16082b 40%, #0d0618 100%);
+            color: #f0e6ff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(107,33,168,0.18), rgba(168,85,247,0.08));
+            border-radius: 16px;
+            border: 1px solid rgba(107,33,168,0.3);
+        }
+        .purplle-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        .purplle-logo .brace {
+            color: #7c3aed;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .purplle-logo .brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #6b21a8;
+            letter-spacing: 1px;
+        }
+        .header h1 {
+            background: linear-gradient(90deg, #9333ea, #7c3aed, #6b21a8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 22px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .header .subtitle {
+            color: #a78bfa;
+            font-size: 12px;
+            margin-top: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* ── Controls ── */
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        select {
+            font-size: 1em;
+            padding: 10px 16px;
+            border-radius: 10px;
+            background: #2d1b4e;
+            color: #d8b4fe;
+            border: 1px solid #7c3aed;
+            cursor: pointer;
+            outline: none;
+        }
+        select:hover, select:focus { border-color: #9333ea; }
+        select option { background: #2d1b4e; color: #d8b4fe; }
+
+        /* ── WebSocket bar ── */
+        #ws-bar { text-align: center; margin-bottom: 16px; font-size: 13px; color: #a78bfa; }
+        .ws-indicator {
+            display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+            background: #555; margin-right: 6px; vertical-align: middle;
+        }
+        .ws-indicator.connected { background: #9333ea; box-shadow: 0 0 8px #9333ea; }
+        .ws-indicator.disconnected { background: #f59e0b; }
+        .ws-indicator.error { background: #ef4444; }
+
+        /* ── Grid ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: linear-gradient(145deg, #1f1145, #180d38);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid rgba(107,33,168,0.25);
+            box-shadow: 0 4px 20px rgba(80,20,140,0.08);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            border-color: rgba(147,51,234,0.45);
+            box-shadow: 0 4px 30px rgba(107,33,168,0.18);
+        }
+        .card h2 {
+            color: #c084fc;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric {
+            font-size: 38px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #9333ea, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sub { font-size: 12px; color: #7c6ba0; margin-top: 6px; }
+
+        /* ── Staff card ── */
+        .staff-card {
+            background: linear-gradient(145deg, #1a1035, #150c2e);
+            border: 1px solid rgba(234,179,8,0.2);
+        }
+        .staff-card h2 { color: #fbbf24; }
+        .staff-metric {
+            font-size: 38px;
+            font-weight: 800;
+            color: #fbbf24;
+        }
+        .staff-details {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #a78bfa;
+        }
+        .staff-details .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(107,33,168,0.1);
+        }
+        .staff-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            background: rgba(234,179,8,0.15);
+            color: #fbbf24;
+            margin-left: 6px;
+        }
+        .customer-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            background: rgba(147,51,234,0.15);
+            color: #a855f7;
+            margin-left: 6px;
+        }
+
+        /* ── Funnel ── */
+        .funnel-bar {
+            background: #1e1040;
+            border-radius: 8px;
+            margin: 8px 0;
+            padding: 12px 14px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(107,33,168,0.12);
+        }
+        .funnel-fill {
+            position: absolute; left: 0; top: 0; bottom: 0;
+            background: linear-gradient(90deg, #6b21a8, #9333ea);
+            opacity: 0.2; border-radius: 8px;
+        }
+        .funnel-text {
+            position: relative; display: flex; justify-content: space-between; font-size: 13px;
+        }
+        .funnel-text span:first-child { font-weight: 600; color: #d8b4fe; }
+        .funnel-text span:last-child { color: #a78bfa; }
+
+        /* ── Heatmap ── */
+        .heatmap-zone {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; margin: 6px 0; background: #1e1040;
+            border-radius: 8px; border: 1px solid rgba(107,33,168,0.1);
+        }
+        .heatmap-bar {
+            height: 6px; border-radius: 3px;
+            background: linear-gradient(90deg, #6b21a8, #9333ea);
+            margin-top: 4px;
+        }
+
+        /* ── Anomaly ── */
+        .anomaly {
+            background: #1a0e35; border-left: 4px solid #7c3aed;
+            padding: 12px; margin: 8px 0; border-radius: 6px;
+        }
+        .anomaly.warn { border-color: #f59e0b; }
+        .anomaly.critical { border-color: #ef4444; }
+        .anomaly.info { border-color: #a78bfa; }
+
+        /* ── Status badges ── */
+        .status {
+            display: inline-block; padding: 4px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+        }
+        .status.ok { background: linear-gradient(90deg, #6b21a8, #9333ea); color: #fff; }
+        .status.stale { background: #f59e0b; color: #000; }
+        .status.error { background: #ef4444; color: #fff; }
+
+        /* ── Event feed ── */
+        #events-section { margin-top: 24px; }
+        #events-section h3 { color: #c084fc; margin-bottom: 10px; }
+        #events {
+            max-height: 300px; overflow: auto; background: #1a0e35;
+            border-radius: 10px; border: 1px solid rgba(107,33,168,0.2); padding: 10px;
+        }
+        .event {
+            padding: 6px 10px; border-bottom: 1px solid rgba(107,33,168,0.1);
+            font-size: 12px; font-family: 'Cascadia Code', 'Fira Code', monospace; color: #c4b5fd;
+        }
+        .event:last-child { border-bottom: none; }
+        .event.entry { color: #a855f7; }
+        .event.exit { color: #ef4444; }
+        .event.zone { color: #f59e0b; }
+        .event.queue { color: #9333ea; }
+        .event.staff { color: #fbbf24; font-style: italic; }
+
+        #lastUpdate { text-align: center; color: #5b4a7a; margin-top: 20px; font-size: 12px; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a0e35; }
+        ::-webkit-scrollbar-thumb { background: #6b21a8; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="purplle-logo">
+            <span class="brace">{</span>
+            <span class="brand">purplle</span>
+            <span class="brace">}</span>
+        </div>
+        <h1>Store Intelligence Dashboard</h1>
+        <div class="subtitle">Code. Create. Conquer. — Real-time Retail Analytics</div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <select id="storeSelect" onchange="window.location.search='?store='+this.value">
+            <option value="ST1076">🏪 Store ST1076 </option>
+            <option value="ST1008">🏪 Store ST1008</option>
+        </select>
+    </div>
+
+    <!-- WebSocket status -->
+    <div id="ws-bar">
+        <span class="ws-indicator" id="ws-dot"></span>
+        <span id="ws-status">connecting...</span>
+    </div>
+
+    <!-- Metric cards -->
+    <div class="grid">
+        <div class="card">
+            <h2>👥 Unique Visitors</h2>
+            <div class="metric" id="visitors">--</div>
+            <div class="sub">Customers only (staff excluded)</div>
+        </div>
+        <div class="card">
+            <h2>💰 Conversion Rate</h2>
+            <div class="metric" id="conversion">--</div>
+            <div class="sub">Visitors → Purchase</div>
+        </div>
+        <div class="card">
+            <h2>⏱️ Avg Dwell Time</h2>
+            <div class="metric" id="dwell">--</div>
+            <div class="sub">Avg seconds across zones</div>
+        </div>
+        <div class="card">
+            <h2>🧾 Queue Depth</h2>
+            <div class="metric" id="queue">--</div>
+            <div class="sub">Current billing queue</div>
+        </div>
+
+        <!-- Staff Detection Card -->
+        <div class="card staff-card">
+            <h2>🏷️ Staff Detection</h2>
+            <div class="staff-metric" id="staff-count">--</div>
+            <div class="sub">Staff members detected &amp; excluded</div>
+            <div class="staff-details" id="staff-details">
+                <div class="row">
+                    <span>Total people detected</span>
+                    <span id="total-people">--</span>
+                </div>
+                <div class="row">
+                    <span>Customers <span class="customer-badge">TRACKED</span></span>
+                    <span id="customer-count">--</span>
+                </div>
+                <div class="row">
+                    <span>Staff <span class="staff-badge">EXCLUDED</span></span>
+                    <span id="staff-excluded">--</span>
+                </div>
+                <div class="row">
+                    <span>Staff fraction</span>
+                    <span id="staff-pct">--%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abandonment -->
+        <div class="card">
+            <h2>🚫 Queue Abandonment</h2>
+            <div class="metric" id="abandonment-rate">--</div>
+            <div class="sub">Visitors who left billing queue</div>
+            <div class="staff-details" style="margin-top:10px">
+                <div class="row">
+                    <span>Queue joined</span>
+                    <span id="queue-joined">--</span>
+                </div>
+                <div class="row">
+                    <span>Abandoned</span>
+                    <span id="queue-abandoned" style="color:#ef4444">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funnel -->
+        <div class="card" style="grid-column: span 2;">
+            <h2>📊 Conversion Funnel</h2>
+            <div id="funnel"><div class="sub">Loading...</div></div>
+        </div>
+
+        <!-- Heatmap -->
+        <div class="card">
+            <h2>🔥 Zone Heatmap</h2>
+            <div id="heatmap"><div class="sub">Loading...</div></div>
+        </div>
+
+        <!-- Anomalies -->
+        <div class="card">
+            <h2>🚨 Active Anomalies</h2>
+            <div id="anomalies"><div class="sub">Loading...</div></div>
+        </div>
+
+        <!-- Health -->
+        <div class="card">
+            <h2>💜 System Health</h2>
+            <div id="health"><div class="sub">Loading...</div></div>
+        </div>
+    </div>
+
+    <div id="lastUpdate"></div>
+
+    <!-- Live event feed -->
+    <div id="events-section">
+        <h3>⚡ Live Event Feed</h3>
+        <div id="events"></div>
+    </div>
+
+    <script>
+        const STORE_ID = new URLSearchParams(window.location.search).get('store') || "ST1076";
+        document.getElementById('storeSelect').value = STORE_ID;
+        const API_BASE = window.location.origin;
+
+        // ── Metrics ──
+        async function fetchMetrics() {
+            try {
+                const resp = await fetch(`${API_BASE}/stores/${STORE_ID}/metrics`);
+                const data = await resp.json();
+
+                document.getElementById("visitors").textContent = data.unique_visitors ?? 0;
+                document.getElementById("conversion").textContent =
+                    (data.conversion_rate ?? 0).toFixed(1) + "%";
+
+                const zones = data.avg_dwell_per_zone || {};
+                const values = Object.values(zones);
+                const avgDwellMs = values.length
+                    ? values.reduce((a, b) => a + b, 0) / values.length
+                    : 0;
+                const dwellSeconds = Math.round(avgDwellMs / 1000);
+                document.getElementById("dwell").textContent =
+                    dwellSeconds > 0 ? dwellSeconds + "s" : "0s";
+                document.getElementById("queue").textContent = data.queue_depth ?? 0;
+
+                document.getElementById("abandonment-rate").textContent =
+                    (data.abandonment_rate ?? 0).toFixed(1) + "%";
+            } catch (e) { console.error("Metrics error:", e); }
+        }
+
+        // ── Staff Stats — read directly from API, no client-side arithmetic ──
+        async function fetchStaffStats() {
+            try {
+                const resp = await fetch(`${API_BASE}/stores/${STORE_ID}/staff-stats`);
+                if (!resp.ok) throw new Error("staff-stats not available");
+                const data = await resp.json();
+
+                document.getElementById("staff-count").textContent     = data.staff_count ?? 0;
+                document.getElementById("total-people").textContent    = data.total_people ?? 0;
+                document.getElementById("customer-count").textContent  = data.customer_count ?? 0;
+                document.getElementById("staff-excluded").textContent  = data.staff_count ?? 0;
+                document.getElementById("staff-pct").textContent       =
+                    (data.exclusion_pct ?? 0).toFixed(1) + "%";
+            } catch (e) {
+                document.getElementById("staff-count").textContent    = "0";
+                document.getElementById("total-people").textContent   = "--";
+                document.getElementById("customer-count").textContent = "--";
+                document.getElementById("staff-excluded").textContent = "0";
+                document.getElementById("staff-pct").textContent      = "0.0%";
+            }
+        }
+
+        // ── Funnel ──
+        async function fetchFunnel() {
+            try {
+                const resp = await fetch(`${API_BASE}/stores/${STORE_ID}/funnel`);
+                const data = await resp.json();
+                const container = document.getElementById("funnel");
+                container.innerHTML = "";
+
+                if (data.stages) {
+                    const stageLabels = {
+                        entry: "🚪 Entry",
+                        zone_visit: "🏪 Zone Visit",
+                        billing_queue: "🧾 Billing Queue",
+                        purchase: "💰 Purchase"
+                    };
+                    const max = data.stages.entry?.count || 1;
+
+                    Object.entries(data.stages).forEach(([key, val]) => {
+                        const barPct = max > 0 ? (val.count / max * 100) : 0;
+                        const dropoff = val.drop_off_pct !== undefined
+                            ? ` · drop-off: ${val.drop_off_pct}%`
+                            : '';
+                        container.innerHTML += `
+                            <div class="funnel-bar">
+                                <div class="funnel-fill" style="width:${barPct}%"></div>
+                                <div class="funnel-text">
+                                    <span>${stageLabels[key] || key}</span>
+                                    <span>${val.count} visitors · ${val.pct}%${dropoff}</span>
+                                </div>
+                            </div>`;
+                    });
+
+                    if (data.abandonment && data.abandonment.count > 0) {
+                        container.innerHTML += `
+                            <div style="margin-top:10px; padding:8px 12px; background:#2d1040; border-radius:8px; border-left:3px solid #ef4444; font-size:12px; color:#fca5a5;">
+                                ⚠️ Queue Abandonment: ${data.abandonment.count} visitors (${data.abandonment.rate_pct}%)
+                            </div>`;
+                    }
+
+                    if (data.abandonment) {
+                        document.getElementById("queue-joined").textContent =
+                            data.stages.billing_queue?.count ?? "--";
+                        document.getElementById("queue-abandoned").textContent =
+                            data.abandonment.count ?? 0;
+                    }
+
+                    if (data.sessions !== undefined) {
+                        container.innerHTML += `<div class="sub" style="margin-top:8px">Total sessions: ${data.sessions}</div>`;
+                    }
+                } else {
+                    container.innerHTML = '<div class="sub">No funnel data yet</div>';
+                }
+            } catch (e) { console.error("Funnel error:", e); }
+        }
+
+        // ── Heatmap ──
+        async function fetchHeatmap() {
+            try {
+                const resp = await fetch(`${API_BASE}/stores/${STORE_ID}/heatmap`);
+                const data = await resp.json();
+                const container = document.getElementById("heatmap");
+                container.innerHTML = "";
+
+                if (data.zones && Object.keys(data.zones).length > 0) {
+                    Object.entries(data.zones).forEach(([zone, info]) => {
+                        const score = info.score || 0;
+                        const dwellSec = Math.round((info.avg_dwell_ms || 0) / 1000);
+                        container.innerHTML += `
+                            <div class="heatmap-zone">
+                                <div>
+                                    <div style="font-weight:600; color:#d8b4fe">${zone}</div>
+                                    <div class="heatmap-bar" style="width:${score}%; min-width:4px;"></div>
+                                </div>
+                                <div style="text-align:right; font-size:12px;">
+                                    <div style="color:#c084fc">${info.frequency} visits</div>
+                                    <div style="color:#7c6ba0">${dwellSec}s avg</div>
+                                    <div style="color:#a78bfa; font-size:11px">score: ${score}</div>
+                                </div>
+                            </div>`;
+                    });
+                    if (data.data_confidence) {
+                        const confColor = data.data_confidence === "high" ? "#9333ea" : "#f59e0b";
+                        container.innerHTML += `<div class="sub" style="margin-top:8px; color:${confColor}">
+                            Confidence: ${data.data_confidence} (${data.total_sessions} sessions)</div>`;
+                    }
+                } else {
+                    container.innerHTML = '<div class="sub">No zone data yet</div>';
+                }
+            } catch (e) { console.error("Heatmap error:", e); }
+        }
+
+        // ── Anomalies ──
+        async function fetchAnomalies() {
+            try {
+                const resp = await fetch(`${API_BASE}/stores/${STORE_ID}/anomalies`);
+                const data = await resp.json();
+                const container = document.getElementById("anomalies");
+                container.innerHTML = "";
+                if (data.anomalies && data.anomalies.length > 0) {
+                    data.anomalies.forEach(a => {
+                        container.innerHTML += `
+                            <div class="anomaly ${(a.severity || '').toLowerCase()}">
+                                <strong style="color:#d8b4fe">${a.type}</strong>
+                                <span style="float:right;font-size:11px;color:#a78bfa">${a.severity}</span><br>
+                                <small style="color:#9ca3af">${a.detail || ""}</small><br>
+                                <small style="color:#c084fc">→ ${a.suggested_action || ""}</small>
+                            </div>`;
+                    });
+                } else {
+                    container.innerHTML = '<div class="sub">No anomalies detected ✅</div>';
+                }
+            } catch (e) { console.error("Anomalies error:", e); }
+        }
+
+        // ── Health ──
+        async function fetchHealth() {
+            try {
+                const resp = await fetch(`${API_BASE}/health`);
+                const data = await resp.json();
+                const container = document.getElementById("health");
+                const statusClass = data.status === "OK" ? "ok" : "error";
+                let html = `<span class="status ${statusClass}">${data.status}</span>
+                    <div class="sub" style="margin-top:10px">Last check: ${data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : "N/A"}</div>`;
+                if (data.stores && Object.keys(data.stores).length > 0) {
+                    html += `<div style="margin-top:10px">`;
+                    Object.entries(data.stores).forEach(([sid, info]) => {
+                        const sc = info.status === "OK" ? "ok" : "stale";
+                        html += `<div style="margin-top:6px;font-size:12px">
+                            <span class="status ${sc}" style="font-size:10px">${info.status}</span>
+                            <span style="margin-left:6px;color:#c4b5fd">${sid}</span>
+                            <div style="color:#7c6ba0;font-size:11px;margin-left:4px">lag: ${info.lag_minutes ?? "?"} min</div>
+                        </div>`;
+                    });
+                    html += `</div>`;
+                }
+                container.innerHTML = html;
+            } catch (e) { console.error("Health error:", e); }
+        }
+
+        // ── Refresh ──
+        async function refresh() {
+            await Promise.all([
+                fetchMetrics(),
+                fetchStaffStats(),
+                fetchFunnel(),
+                fetchHeatmap(),
+                fetchAnomalies(),
+                fetchHealth()
+            ]);
+            document.getElementById("lastUpdate").textContent =
+                "Last updated: " + new Date().toLocaleTimeString();
+        }
+
+        // ── WebSocket ──
+        const wsStatusEl = document.getElementById('ws-status');
+        const wsDotEl = document.getElementById('ws-dot');
+        const eventsEl = document.getElementById('events');
+
+        function eventClass(type) {
+            if (!type) return '';
+            const t = type.toLowerCase();
+            if (t === 'entry' || t === 'reentry') return 'entry';
+            if (t === 'exit') return 'exit';
+            if (t.startsWith('zone')) return 'zone';
+            if (t.startsWith('queue') || t.startsWith('billing')) return 'queue';
+            return '';
+        }
+
+        function addEventDisplay(ev) {
+            const d = document.createElement('div');
+            const et = ev.event_type || '';
+            const isStaff = ev.is_staff ?? false;
+            d.className = `event ${isStaff ? 'staff' : eventClass(et)}`;
+
+            const ts_raw = ev.event_timestamp || ev.event_time || ev.queue_join_ts || ev.timestamp;
+            const ts = ts_raw ? new Date(ts_raw).toLocaleTimeString() : new Date().toLocaleTimeString();
+            const vid = ev.id_token || ev.track_id || ev.visitor_id;
+            const zone = ev.zone_name || ev.zone_id;
+            const gender = ev.gender_pred || ev.gender;
+            const age = ev.age_pred || ev.age;
+            const staffLabel = isStaff ? ' [STAFF]' : '';
+
+            // Build line dynamically — only include fields that have real values
+            const parts = [ts, `${et}${staffLabel}`];
+            if (vid) parts.push(`visitor=${vid}`);
+            if (zone) parts.push(`zone=${zone}`);
+            if (gender && age) parts.push(`${gender}/${age}`);
+
+            d.textContent = parts.join(' | ');
+            eventsEl.prepend(d);
+            while (eventsEl.children.length > 200) {
+                eventsEl.removeChild(eventsEl.lastChild);
+            }
+        }
+
+        function handleEvent(ev) {
+            if (!ev) return;
+            addEventDisplay(ev);
+            refresh();
+        }
+
+        function connect() {
+            const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+            const wsUrl = `${protocol}://${location.host}/ws/live`;
+            const sock = new WebSocket(wsUrl);
+            sock.addEventListener('open', () => {
+                wsStatusEl.textContent = 'live feed connected';
+                wsDotEl.className = 'ws-indicator connected';
+            });
+            sock.addEventListener('close', () => {
+                wsStatusEl.textContent = 'disconnected — retrying in 3s...';
+                wsDotEl.className = 'ws-indicator disconnected';
+                setTimeout(connect, 3000);
+            });
+            sock.addEventListener('error', () => {
+                wsStatusEl.textContent = 'connection error';
+                wsDotEl.className = 'ws-indicator error';
+            });
+            sock.addEventListener('message', (m) => {
+                try {
+                    const data = JSON.parse(m.data);
+                    if (data && data.echo) return;
+                    handleEvent(data);
+                } catch (_) {
+                    const t = document.createElement('div');
+                    t.className = 'event';
+                    t.textContent = `${new Date().toLocaleTimeString()} | ${m.data}`;
+                    eventsEl.prepend(t);
+                }
+            });
+        }
+
+        // ── Boot ──
+        refresh();
+        setInterval(refresh, 5000);
+        connect();
+    </script>
+</body>
+</html>
