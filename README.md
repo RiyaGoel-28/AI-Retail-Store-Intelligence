@@ -288,6 +288,3 @@ Every test file has a `# PROMPT:` header recording the prompt and what was kept/
 
 ---
 
-## 📜 License
-
-Submission for Purplle Store Intelligence challenge — code is for evaluation purposes.
