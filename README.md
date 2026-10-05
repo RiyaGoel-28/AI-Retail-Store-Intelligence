@@ -293,15 +293,6 @@ Documented in detail in [DESIGN.md §4](./DESIGN.md#4-edge-case-handling). Summa
 
 ---
 
-## 🤖 AI Tools Used
-
-- **GitHub Copilot** — boilerplate, test scaffolding, Pydantic models
-- **Claude (Anthropic)** — architecture decisions, edge-case analysis, staff-detection trade-offs
-- **ChatGPT** — documentation drafting, test scenario brainstorming
-
-Every test file has a `# PROMPT:` header recording the prompt and what was kept/changed. Three high-impact AI suggestions where I deviated are documented in [DESIGN.md §6](./DESIGN.md).
-
----
 
 ## 🛠️ Tech Stack
 
