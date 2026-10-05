@@ -1,7 +1,22 @@
-# Store Intelligence — AI-Powered Retail Analytics
+# AI-Powered Retail Store Intelligence
 
-End-to-end system that turns raw retail CCTV into live operational intelligence: visitor counting, conversion funnels, zone heatmaps, queue analytics, and anomaly alerts — all served through a containerised FastAPI backend with a real-time HTML dashboard.
+An end-to-end AI and software engineering platform that converts retail CCTV footage into actionable store intelligence.
 
+The system uses YOLOv8-based computer vision and object tracking to identify customer movement and generate real-time analytics including:
+
+- Visitor counting
+- Customer conversion funnel
+- Zone-wise traffic and dwell time
+- Billing queue analytics
+- Queue abandonment
+- Anomaly detection
+- Store health monitoring
+
+The processed events are served through a FastAPI REST backend and WebSocket layer and visualized through a real-time web dashboard.
+
+## Key Technologies
+
+Python | FastAPI | YOLOv8 | OpenCV | WebSockets | SQLite | REST APIs | Docker | JavaScript | Pytest
 ---
 
 ## 🚀 Quick Start (60 seconds)
