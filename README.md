@@ -235,7 +235,7 @@ http://localhost:8000/ — KPIs and funnel update live as events flow.
 ## 📁 Project Structure
 
 ```
-store-intelligence/
+AI-Retail-Store-Intelligence/
 ├── app/
 │   ├── main.py             # FastAPI entrypoint
 │   ├── schemas.py          # Pydantic models + event-type normalization
