@@ -7,9 +7,8 @@ End-to-end system that turns raw retail CCTV into live operational intelligence:
 ## 🚀 Quick Start (60 seconds)
 
 ```bash
-git clone https://github.com/Abhinav7678/store-intelligence.git
-cd store-intelligence
-docker compose up --build -d
+git clone https://github.com/RiyaGoel-28/AI-Retail-Store-Intelligence.git
+cd AI-Retail-Store-Intelligence
 ```
 
 Then open:
