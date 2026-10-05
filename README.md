@@ -1,4 +1,4 @@
-# AI-Powered Retail Store Intelligence
+## AI-Powered Retail Store Intelligence
 
 An end-to-end AI and software engineering platform that converts retail CCTV footage into actionable store intelligence.
 
