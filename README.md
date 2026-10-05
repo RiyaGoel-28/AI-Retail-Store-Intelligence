@@ -19,6 +19,29 @@ The processed events are served through a FastAPI REST backend and WebSocket lay
 Python | FastAPI | YOLOv8 | OpenCV | WebSockets | SQLite | REST APIs | Docker | JavaScript | Pytest
 ---
 
+## Frontend & Backend
+
+### Frontend
+- HTML5
+- CSS
+- JavaScript
+- Real-time WebSocket updates
+- KPI dashboard
+- Funnel visualization
+- Queue monitoring
+- Anomaly display
+
+### Backend
+- Python
+- FastAPI
+- REST APIs
+- WebSocket communication
+- Pydantic validation
+- SQLite
+- Event ingestion
+- Analytics aggregation
+---
+
 ## 🚀 Quick Start (60 seconds)
 
 ```bash
