@@ -42,6 +42,22 @@ Python | FastAPI | YOLOv8 | OpenCV | WebSockets | SQLite | REST APIs | Docker | 
 - Analytics aggregation
 ---
 
+## 📊 Dashboard Preview
+
+The platform provides real-time retail analytics including customer traffic,
+conversion funnel, queue behavior, staff detection, zone-level engagement,
+and anomaly monitoring.
+
+### Main Dashboard
+
+![Retail Store Intelligence Dashboard](docs/media/dashboard-main.jpg)
+
+### Zone Analytics & Anomaly Monitoring
+
+![Zone Heatmap and Anomalies](docs/media/dashboard-analytics.jpg)
+
+
+
 ## 🚀 Quick Start (60 seconds)
 
 ```bash
